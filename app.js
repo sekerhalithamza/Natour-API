@@ -9,6 +9,8 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
 
+const emptyIds = [];
+
 app.get("/", (req, res) => {
   res
     .status(200)
@@ -46,9 +48,10 @@ app.get("/api/v1/tours/:id", (req, res) => {
 });
 
 app.post("/api/v1/tours", (req, res) => {
-  const newId = tours[tours.length - 1].id + 1;
+  const newId = emptyIds[0] ? emptyIds[0] : tours.length;
   const newTour = Object.assign({ id: newId, ...req.body });
-  tours.push(newId);
+  tours.push(newTour);
+  if (emptyIds.indexOf(newId) > -1) emptyIds.splice(emptyIds.indexOf(newId), 1);
 
   fs.writeFile(
     `${__dirname}/dev-data/data/tours-simple.json`,
@@ -78,12 +81,44 @@ app.patch("/api/v1/tours/:id", (req, res) => {
   const newTour = { id: oldTour.id, ...req.body };
   tours.splice(oldTour.id, 1);
   tours.push(newTour);
-  res.status(200).json({
-    status: "success",
-    data: {
-      tour: newTour,
-    },
-  });
+  fs.writeFile(
+    `${__dirname}/dev-data/data/tours-simple.json`,
+    JSON.stringify(tours),
+    err => {
+      if (err) return res.status(404).send("There was a error");
+
+      res.status(200).json({
+        status: "success",
+        data: {
+          tour: newTour,
+        },
+      });
+    }
+  );
+});
+
+app.delete("/api/v1/tours/:id", (req, res) => {
+  const tour = tours.find(el => el.id == req.params.id);
+  if (!tour)
+    return res.status(404).json({
+      status: "fail",
+      message: "Invalid id",
+    });
+
+  tours.splice(tour.id, 1);
+  emptyIds.push(tour.id);
+  fs.writeFile(
+    `${__dirname}/dev-data/data/tours-simple.json`,
+    JSON.stringify(tours),
+    err => {
+      if (err) return res.status(404).send("There was a error");
+
+      res.status(204).json({
+        status: "success",
+        data: null,
+      });
+    }
+  );
 });
 
 const port = 3000;
