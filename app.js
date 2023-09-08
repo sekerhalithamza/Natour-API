@@ -1,5 +1,6 @@
 // MODULES
 const dotenv = require("dotenv");
+
 dotenv.config({ path: `./config.env` });
 const express = require("express");
 const morgan = require("morgan");
@@ -15,8 +16,8 @@ app.use(express.static(`${__dirname}/public`));
 
 // ROUTERS
 
-const tourRouter = require(`${__dirname}/routers/tourRouter`);
-const userRouter = require(`${__dirname}/routers/userRouter`);
+const tourRouter = require("./routers/tourRouter");
+const userRouter = require("./routers/userRouter");
 
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
