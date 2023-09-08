@@ -1,15 +1,17 @@
 // MODULES
-const fs = require("fs");
+const dotenv = require("dotenv");
+dotenv.config({ path: `./config.env` });
 const express = require("express");
 const morgan = require("morgan");
-const exp = require("constants");
 
 // Creating the app
 const app = express();
 
 // MIDDLEWARE
-app.use(morgan("dev"));
+
+if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
 app.use(express.json());
+app.use(express.static(`${__dirname}/public`));
 
 // ROUTERS
 
@@ -20,7 +22,7 @@ app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
 
 // Starting the server
-const port = 3000;
+const port = process.env.port || 3000;
 app.listen(port, () => {
   console.log(`App running on port ${port}...`);
 });
