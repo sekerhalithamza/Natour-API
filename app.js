@@ -1,8 +1,9 @@
 const fs = require("fs");
 const express = require("express");
+const morgan = require("morgan");
 
 const app = express();
-
+app.use(morgan("dev"));
 app.use(express.json());
 
 const tours = JSON.parse(
@@ -113,7 +114,11 @@ const deleteTour = (req, res) => {
 
 app.route("/api/v1/tours").get(getAllTours).post(createTour);
 
-app.route("api/v1/tours/id:").get(getTour).patch(updateTour).delete(deleteTour);
+app
+  .route("/api/v1/tours/:id")
+  .get(getTour)
+  .patch(updateTour)
+  .delete(deleteTour);
 
 const port = 3000;
 app.listen(port, () => {
