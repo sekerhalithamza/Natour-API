@@ -40,10 +40,14 @@ const createTour = (req, res) => {
   if (emptyIds.indexOf(newId) > -1) emptyIds.splice(emptyIds.indexOf(newId), 1);
 
   fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
+    `${__dirname}/../dev-data/data/tours-simple.json`,
     JSON.stringify(tours),
     err => {
-      if (err) return res.status(404).send("There was a error");
+      if (err)
+        return res.status(404).json({
+          status: "failed",
+          message: `There was a error. (${err.message})`,
+        });
 
       res.status(201).json({
         status: "success",
@@ -71,7 +75,11 @@ const updateTour = (req, res) => {
     `${__dirname}/..dev-data/data/tours-simple.json`,
     JSON.stringify(tours),
     err => {
-      if (err) return res.status(404).send("There was a error");
+      if (err)
+        return res.status(404).json({
+          status: "failed",
+          message: `There was a error. (${err.message})`,
+        });
 
       res.status(200).json({
         status: "success",
@@ -107,10 +115,28 @@ const deleteTour = (req, res) => {
   );
 };
 
+const checkBody = (req, res, next) => {
+  if (!req.body.name || !req.body.price)
+    return res.status(400).json({
+      status: "failed",
+      message: "The body does not contain any name or price value",
+    });
+  next();
+};
+
 const router = express.Router();
 
-router.route("/").get(getAllTours).post(createTour);
+router.param("id", (req, res, next, val) => {
+  console.log(`Tour id is ${val}`);
+  next();
+});
 
-router.route("/:id").get(getTour).patch(updateTour).delete(deleteTour);
+router.route("/").get(getAllTours).post(checkBody, createTour);
+
+router
+  .route("/:id")
+  .get(getTour)
+  .patch(checkBody, updateTour)
+  .delete(deleteTour);
 
 module.exports = router;
