@@ -103,26 +103,30 @@ router.route("/").get(getAllTours).post(createTour);
 
 router.route("/:id").get(getTour).patch(updateTour).delete(deleteTour);
 
-const DB = process.env.DATABASE.replace(
-  "<USERNAME>",
-  process.env.DATABASE_USER_NAME
-).replace("<PASSWORD>", process.env.DATABASE_PASSWORD);
-
-mongoose
-  .connect(DB, {
-    useNewUrlParser: true,
-  })
-  .then(() => {
-    console.log("DB connection succesful");
-  });
-
 const tourSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, "A tour must have a name"],
     unique: true,
+    trim: true,
   },
-  rating: {
+  duration: {
+    type: Number,
+    required: [true, "A tour must have a duration"],
+  },
+  maxGroupSize: {
+    type: Number,
+    required: [true, "A tour must have a max group size"],
+  },
+  difficulty: {
+    type: String,
+    required: [true, "A tour must have a difficulty"],
+  },
+  ratingsAverage: {
+    type: Number,
+    default: 0,
+  },
+  ratingsQuantity: {
     type: Number,
     default: 0,
   },
@@ -130,6 +134,26 @@ const tourSchema = new mongoose.Schema({
     type: Number,
     required: [true, "A tour must have a price"],
   },
+  priceDiscount: Number,
+  summary: {
+    type: String,
+    trim: true,
+  },
+  description: {
+    type: String,
+    trim: true,
+    required: [true, "A tour must have a description"],
+  },
+  imageCover: {
+    type: String,
+    required: [true, "A tour must have a cover image"],
+  },
+  images: [String],
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
+  startDates: [Date],
 });
 
 const Tour = mongoose.model("Tour", tourSchema);

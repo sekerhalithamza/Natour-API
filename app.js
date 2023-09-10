@@ -4,8 +4,21 @@ const dotenv = require("dotenv");
 dotenv.config({ path: `./config.env` });
 const express = require("express");
 const morgan = require("morgan");
+const mongoose = require("mongoose");
 
 // DATABASE
+const DB = process.env.DATABASE.replace(
+  "<USERNAME>",
+  process.env.DATABASE_USER_NAME
+).replace("<PASSWORD>", process.env.DATABASE_PASSWORD);
+
+mongoose
+  .connect(DB, {
+    useNewUrlParser: true,
+  })
+  .then(() => {
+    console.log("DB connection succesful");
+  });
 
 // THE APP
 
