@@ -76,7 +76,26 @@ const updateTour = async (req, res) => {
   }
 };
 
-const deleteTour = (req, res) => {};
+const deleteTour = async (req, res) => {
+  try {
+    const tour = await Tour.findByIdAndDelete(req.params.id);
+    if (!tour)
+      return res.status(404).json({
+        status: "failed",
+        message: "Invalid id",
+      });
+
+    res.status(204).json({
+      status: "success",
+      data: null,
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: "failed",
+      message: err.message,
+    });
+  }
+};
 
 const router = express.Router();
 
