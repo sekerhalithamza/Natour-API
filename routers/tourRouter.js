@@ -3,7 +3,30 @@ const mongoose = require("mongoose");
 
 const getAllTours = async (req, res) => {
   try {
-    const tours = await Tour.find();
+    const queryObj = { ...req.query };
+
+    const includedFields = [
+      "name",
+      "duration",
+      "maxGroupSize",
+      "difficulty",
+      "ratingsAverage",
+      "ratingsQuantity",
+      "price",
+      "priceDiscount",
+      "summary",
+      "description",
+      "imageCover",
+      "images",
+      "createdAt",
+    ];
+
+    for (const el in queryObj) {
+      if (includedFields.indexOf(el) < 0) delete queryObj[el];
+    }
+
+    console.log(queryObj);
+    const tours = await Tour.find(queryObj);
     res.status(200).json({
       status: "success",
       results: tours.length,
