@@ -1,6 +1,8 @@
+// MODULES
 const express = require("express");
 const mongoose = require("mongoose");
 
+// FUNCTIONS
 const getAllTours = async (req, res) => {
   try {
     let queryObj = { ...req.query };
@@ -47,9 +49,9 @@ const getAllTours = async (req, res) => {
     const numTours = await Tour.countDocuments();
 
     // Pagination
-    if (req.query.page) {
-      const page = req.query.page;
-      const limit = req.query.limit ? req.query.limit : 5;
+    if (req.query.page || req.query.limit) {
+      const page = req.query.page ? req.query.page : 1;
+      const limit = req.query.limit ? req.query.limit : 10;
       const skip = (page - 1) * limit;
       if (skip >= numTours) throw new Error("This page does not exist");
       query = query.skip(skip).limit(limit);
@@ -74,6 +76,13 @@ const getAllTours = async (req, res) => {
   }
 };
 
+const aliasTopTours = async (req, res, next) => {
+  req.query.limit = "5";
+  req.query.sort = "price,-ratingsAverage";
+  req.query.fields = "name,price,ratingsAverage,summary,difficulty";
+  next();
+};
+
 const getTour = async (req, res) => {
   try {
     const tour = await Tour.findById(req.params.id);
@@ -91,9 +100,6 @@ const getTour = async (req, res) => {
 };
 
 const createTour = async (req, res) => {
-  // const newTour = new Tour({});
-  // newTour.save()
-
   try {
     const newTour = await Tour.create(req.body);
 
@@ -152,12 +158,16 @@ const deleteTour = async (req, res) => {
   }
 };
 
+// ROUTING
 const router = express.Router();
 
 router.route("/").get(getAllTours).post(createTour);
 
+router.route("/top-5-cheap").get(aliasTopTours, getAllTours);
+
 router.route("/:id").get(getTour).patch(updateTour).delete(deleteTour);
 
+// Data scheme
 const tourSchema = new mongoose.Schema({
   name: {
     type: String,
