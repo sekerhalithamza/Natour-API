@@ -1,64 +1,18 @@
 // MODULES
 const express = require("express");
 const mongoose = require("mongoose");
+const APIFeatures = require("./../utils/apiFeatuers");
 
 // FUNCTIONS
 const getAllTours = async (req, res) => {
   try {
-    let queryObj = { ...req.query };
-    const includedFields = [
-      "name",
-      "duration",
-      "maxGroupSize",
-      "difficulty",
-      "ratingsAverage",
-      "ratingsQuantity",
-      "price",
-      "priceDiscount",
-      "summary",
-      "description",
-      "imageCover",
-      "images",
-      "createdAt",
-    ];
-
-    // Basic filtering
-    for (const el in queryObj) {
-      if (includedFields.indexOf(el) < 0) {
-        delete queryObj[el];
-      }
-    }
-
-    // Advanced filtering
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
-    let query = Tour.find(JSON.parse(queryStr));
-
-    // Sorting
-    if (req.query.sort) {
-      query = query.sort(req.query.sort.split(",").join(" "));
-    } else {
-      query = query.sort("-createdAt");
-    }
-
-    // Field limiting
-    if (req.query.fields) {
-      query = query.select(req.query.fields.split(",").join(" "));
-    }
-    query = query.select("-__v");
-    const numTours = await Tour.countDocuments();
-
-    // Pagination
-    if (req.query.page || req.query.limit) {
-      const page = req.query.page ? req.query.page : 1;
-      const limit = req.query.limit ? req.query.limit : 10;
-      const skip = (page - 1) * limit;
-      if (skip >= numTours) throw new Error("This page does not exist");
-      query = query.skip(skip).limit(limit);
-    }
-
     // Executing the data
-    const tours = await query;
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const tours = await features.query;
 
     // Sending the response
     res.status(200).json({
