@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 const getAllTours = async (req, res) => {
   try {
     let queryObj = { ...req.query };
-
     const includedFields = [
       "name",
       "duration",
@@ -22,12 +21,19 @@ const getAllTours = async (req, res) => {
     ];
 
     for (const el in queryObj) {
-      if (includedFields.indexOf(el) < 0) delete queryObj[el];
+      if (includedFields.indexOf(el) < 0) {
+        delete queryObj[el];
+      }
     }
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
-    queryObj = JSON.parse(queryStr);
-    const tours = await Tour.find(queryObj);
+    let query = Tour.find(JSON.parse(queryStr));
+    if (req.query.sort) {
+      query = query.sort(req.query.sort.split(",").join(" "));
+    } else {
+      query = query.sort("-createdAt");
+    }
+    const tours = await query;
     res.status(200).json({
       status: "success",
       results: tours.length,
@@ -36,6 +42,7 @@ const getAllTours = async (req, res) => {
       },
     });
   } catch (err) {
+    console.log(err);
     res.status(404).json({
       status: "failed",
       message: err.message,
