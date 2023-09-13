@@ -20,20 +20,34 @@ const getAllTours = async (req, res) => {
       "createdAt",
     ];
 
+    // Basic filtering
     for (const el in queryObj) {
       if (includedFields.indexOf(el) < 0) {
         delete queryObj[el];
       }
     }
+
+    // Advanced filtering
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
     let query = Tour.find(JSON.parse(queryStr));
+
+    // Sorting
     if (req.query.sort) {
       query = query.sort(req.query.sort.split(",").join(" "));
     } else {
       query = query.sort("-createdAt");
     }
+
+    // Field limiting
+    if (req.query.fields) {
+      query = query.select(req.query.fields.split(",").join(" "));
+    }
+    query = query.select("-__v");
+    // Executing the data
     const tours = await query;
+
+    // Sending the response
     res.status(200).json({
       status: "success",
       results: tours.length,
