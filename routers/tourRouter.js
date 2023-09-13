@@ -44,6 +44,17 @@ const getAllTours = async (req, res) => {
       query = query.select(req.query.fields.split(",").join(" "));
     }
     query = query.select("-__v");
+    const numTours = await Tour.countDocuments();
+
+    // Pagination
+    if (req.query.page) {
+      const page = req.query.page;
+      const limit = req.query.limit ? req.query.limit : 5;
+      const skip = (page - 1) * limit;
+      if (skip >= numTours) throw new Error("This page does not exist");
+      query = query.skip(skip).limit(limit);
+    }
+
     // Executing the data
     const tours = await query;
 
@@ -56,7 +67,6 @@ const getAllTours = async (req, res) => {
       },
     });
   } catch (err) {
-    console.log(err);
     res.status(404).json({
       status: "failed",
       message: err.message,
