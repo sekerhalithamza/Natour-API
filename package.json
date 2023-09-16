@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start:dev": "nodemon .",
+    "start:dev": "SET NODE_ENV=development && nodemon .",
     "__comment__": "in mac or linux dont use set for start:prod",
     "start:prod": "SET NODE_ENV=production && nodemon ."
   },
