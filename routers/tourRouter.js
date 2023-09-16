@@ -12,6 +12,7 @@ router
   .get(controller.aliasTopTours, controller.getAllTours);
 
 router.route("/tour-stats").get(controller.getTourStats);
+router.route("/monthly-plan/:year").get(controller.getMonthlyPlan);
 
 router
   .route("/:id")
