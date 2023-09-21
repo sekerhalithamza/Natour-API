@@ -42,6 +42,5 @@ app.use("/api/v1/users", userRouter);
 // Starting the server
 const port = process.env.port || 3000;
 app.listen(port, () => {
-  // eslint-disable-next-line no-console
   console.log(`App running on port ${port}...`);
 });
